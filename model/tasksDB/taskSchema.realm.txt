@@ -1,0 +1,113 @@
+/*
+
+creator: @kennamantsho
+last edit: 17.06.20 16:57
+description: This is a simple CRUD functions of this task manager.
+
+dependencies: [realm]
+*/
+
+const Realm = require('realm');
+
+
+const RepeatSchema = {
+
+  name: 'DatesRepeat',
+  properties: {
+
+    w: {type: 'int?[]'}, //days: 0-6 / S M T W T F S
+    m: {type: 'int?[]'}, // 0-11
+	  y: {type: 'bool', default: 0},
+    until: 'date?'
+  }
+};
+
+
+const DatesSchema = {
+
+  name: 'Dates',
+  properties: {
+
+    start: 'date', //start day time
+    end: 'date', //end day time
+    timeZone: 'string?',
+    completed: 'bool?', //missed is 0 & completed is 1
+	  repeat: 'DatesRepeat?'
+  }
+};
+
+
+const TaskSchema = {
+
+  name: 'Task',
+  primaryKey: 'id',
+  properties: {
+
+    id: 'int',
+    title: 'string',
+    image: 'string?',
+    urgency: {type: 'bool', default: false}, 
+    private: {type: 'bool', default: false},
+    subTasksIds: 'string?[]',
+    notes: 'string?',
+    location: 'string?',
+    date: 'Dates[]'
+  }
+}
+
+
+const taskCreate = realm => {
+
+  realm.write(() => {
+
+    const task = realm.create('Task', {
+    
+      id: 2,
+      title: 'push-ups',
+      notes: '20 reps, 3 sets',
+      date: [{
+  
+        start: new Date(2019,9,3,6,40), 
+        end: new Date(2019,9,3,7,0)
+      }]
+    });
+  });
+
+};
+
+
+const taskRead = realm => {
+
+  const tasks = realm.objects('Task');
+  console.log(tasks);
+};
+
+
+const taskUpdate = realm => {
+
+  realm.write(() => {
+ 
+    const task = realm.create('Task', {id: 0}, true);
+  });
+};
+
+
+const taskDelete = realm => {
+
+  realm.write(() => {
+
+    const task = realm.objects('Task').filtered('id == 1');
+    realm.delete(task);
+  });
+};
+
+
+Realm.open({schema: [RepeatSchema, DatesSchema, TaskSchema], schemaVersion: 22}).then(
+
+  realm => { 
+
+    taskDelete(realm);
+    taskRead(realm);
+  }
+
+).catch(err => console.log(err));
